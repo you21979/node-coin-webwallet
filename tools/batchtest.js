@@ -1,6 +1,7 @@
 #!/usr/bin/node
 
 var LIB = "../lib";
+var CONFIG = "../config";
 
 var BitcoinTask = require(LIB+'/bitcointask');
 var bitcoinManager = require(LIB+'/bitcoinmanager');
@@ -33,6 +34,6 @@ var main = function(config){
 }
 
 var fs = require('fs');
-var config = fs.readFileSync('../config/coind.json', 'utf-8');
+var config = fs.readFileSync(CONFIG+'/coind.json', 'utf-8');
 
 main(JSON.parse(config));
