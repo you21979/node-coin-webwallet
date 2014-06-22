@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
 var LIB = "../lib";
-var CONFIG = "../config";
+var CONFIG = __dirname + "/../config";
 
 var BitcoinTask = require(LIB+'/bitcointask');
 var bitcoinManager = require(LIB+'/bitcoinmanager');
