@@ -1,0 +1,14 @@
+{
+ "bitcoin" : {
+  "host" : "localhost",
+  "port" : "3333",
+  "user" : "rpcuser",
+  "pass" : "x"
+ },
+ "litecoin" : {
+  "host" : "localhost",
+  "port" : "4444",
+  "user" : "rpcuser",
+  "pass" : "x"
+ }
+}
