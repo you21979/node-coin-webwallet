@@ -1,39 +1,50 @@
 #!/usr/bin/node
 
-var LIB = "../lib";
 var CONFIG = __dirname + "/../config";
 
-var BitcoinTask = require(LIB+'/bitcointask');
-var bitcoinManager = require(LIB+'/bitcoinmanager');
+var cmdlib = require('./cmdlib'),
+    bitcoinManager = cmdlib.manager,
+    bitcoinUtil = cmdlib.util;
 
-var main = function(config){
+var SyncWait = require('syncwait');
+var fs = require('fs');
 
-    Object.keys(config).forEach(function(key){
-        config[key]['timeout'] = 30000;
-        var coind = new BitcoinTask(key, config[key]);
-        bitcoinManager.add(coind);
-    });
-
-    bitcoinManager.setReport(function(name,count,laptime){console.log(name,count,laptime);});
-    bitcoinManager.run();
+var proc = function(callback){
     var flag = true;
 
-    Object.keys(config).forEach(function(key){
+    bitcoinManager.setReport(function(name,count,laptime){console.log(name,count,laptime);});
+
+    bitcoinManager.forEach(function(key){
         var INTERVAL = 1000;
         var COUNT = 3000;
         var set = function(){
-            for(var i = 0; i<COUNT; ++i)bitcoinManager.get(key).cmd('getbalance',['hoge', 6], function(err, val){});
+            for(var i = 0; i<COUNT; ++i)bitcoinManager.get(key).cmd('getbalance',['', 6], function(err, val){});
             if(flag)setTimeout(set, INTERVAL);
-        }
+        };
         set();
     });
     setTimeout(function(){
-        bitcoinManager.stop();
         flag = false;
-    },10000);
+    },5000);
+    var update = function(){
+        if(flag){
+            setTimeout(update, 1000);
+        }else{
+            var count = 0;
+            bitcoinManager.forEach(function(key){
+                count += bitcoinManager.get(key).q.length;
+            });
+            if(count === 0){
+                bitcoinManager.stop();
+            }else{
+                setTimeout(update, 1000);
+            }
+        }
+    };
+    update();
 }
-
-var fs = require('fs');
-var config = fs.readFileSync(CONFIG+'/coind.json', 'utf-8');
-
-main(JSON.parse(config));
+var main = function(){
+    var config = fs.readFileSync(CONFIG+'/coind.json', 'utf-8');
+    cmdlib.bootstrap(JSON.parse(config), proc);
+}
+main();
